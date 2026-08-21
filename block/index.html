@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Block Section — Gazi Masud</title>
+<meta name="description" content="Deep work block planner: a Pomodoro timer plus ten time blocks with their own task lists." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet" />
+<style>
+/* ---------------------------------------------------------------
+   BRAND TOKENS — swap these for the exact hexes from gazimasud.com
+   --------------------------------------------------------------- */
+:root {
+  --accent:      #06b6d4;   /* primary / focus     */
+  --accent-soft: #22d3ee;   /* hover + glow        */
+  --success:     #3fcf8e;   /* breaks + completed  */
+  --warn:        #fbbf24;   /* long break          */
+}
+
+:root[data-theme="dark"] {
+  --bg: #0a0a0a;
+  --bg-grad: radial-gradient(1200px 600px at 50% -10%, rgba(6,182,212,.10), transparent 70%);
+  --surface: #101012;
+  --surface-2: #16161a;
+  --border: #232329;
+  --border-strong: #32323a;
+  --text: #ededf0;
+  --text-dim: #a1a1ab;
+  --text-faint: #6b6b77;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 8px 24px rgba(0,0,0,.35);
+}
+
+:root[data-theme="light"] {
+  --bg: #fafafa;
+  --bg-grad: radial-gradient(1200px 600px at 50% -10%, rgba(6,182,212,.14), transparent 70%);
+  --surface: #ffffff;
+  --surface-2: #f4f4f6;
+  --border: #e5e5ea;
+  --border-strong: #d4d4dc;
+  --text: #0d0d10;
+  --text-dim: #55555f;
+  --text-faint: #8a8a95;
+  --shadow: 0 1px 2px rgba(16,16,20,.06), 0 8px 24px rgba(16,16,20,.06);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: var(--bg);
+  background-image: var(--bg-grad);
+  background-repeat: no-repeat;
+  color: var(--text);
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+}
+
+.wrap { width: min(1120px, 100% - 2.5rem); margin-inline: auto; }
+
+/* ---------------- header ---------------- */
+header {
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: blur(12px);
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.bar { display: flex; align-items: center; gap: 1rem; height: 62px; }
+.brand { display: flex; align-items: center; gap: .6rem; font-weight: 700; letter-spacing: -.02em; text-decoration: none; color: var(--text); }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 18%, transparent); }
+.bar nav { margin-left: auto; display: flex; align-items: center; gap: .35rem; }
+.bar nav a { color: var(--text-dim); text-decoration: none; font-size: .875rem; font-weight: 500; padding: .45rem .7rem; border-radius: 8px; }
+.bar nav a:hover { color: var(--text); background: var(--surface-2); }
+
+.icon-btn {
+  display: grid; place-items: center; width: 36px; height: 36px;
+  border: 1px solid var(--border); border-radius: 9px;
+  background: var(--surface); color: var(--text-dim); cursor: pointer;
+  font-size: .95rem; transition: .16s;
+}
+.icon-btn:hover { color: var(--text); border-color: var(--border-strong); }
+
+/* ---------------- hero ---------------- */
+.hero { padding: 3.2rem 0 1.6rem; text-align: center; }
+.eyebrow {
+  display: inline-flex; align-items: center; gap: .5rem;
+  font-size: .74rem; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
+  padding: .3rem .75rem; border-radius: 999px;
+}
+.hero h1 { font-size: clamp(2.1rem, 6vw, 3.4rem); font-weight: 800; letter-spacing: -.035em; margin: 1rem 0 .55rem; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p { color: var(--text-dim); max-width: 46ch; margin-inline: auto; }
+
+/* ---------------- timer ---------------- */
+.timer-card {
+  margin: 2rem 0 3.4rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  box-shadow: var(--shadow);
+  padding: 1.8rem clamp(1rem, 4vw, 2.4rem) 1.6rem;
+  position: relative; overflow: hidden;
+}
+.timer-card::before {
+  content: ''; position: absolute; inset: 0 0 auto 0; height: 3px;
+  background: linear-gradient(90deg, var(--accent), var(--accent-soft), var(--success));
+  opacity: .85;
+}
+
+.modes { display: flex; justify-content: center; gap: .3rem; background: var(--surface-2); border: 1px solid var(--border); padding: .28rem; border-radius: 12px; width: max-content; margin-inline: auto; }
+.modes button {
+  font: inherit; font-size: .84rem; font-weight: 600;
+  color: var(--text-dim); background: none; border: 0; cursor: pointer;
+  padding: .5rem .95rem; border-radius: 9px; transition: .16s; white-space: nowrap;
+}
+.modes button:hover { color: var(--text); }
+.modes button[aria-selected="true"] { background: var(--bg); color: var(--text); box-shadow: var(--shadow); }
+.modes button[aria-selected="true"][data-mode="focus"] { color: var(--accent); }
+.modes button[aria-selected="true"][data-mode="short"] { color: var(--success); }
+.modes button[aria-selected="true"][data-mode="long"]  { color: var(--warn); }
+
+.ring-wrap { position: relative; width: min(300px, 74vw); aspect-ratio: 1; margin: 1.6rem auto .4rem; }
+.ring { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring .track { fill: none; stroke: var(--surface-2); stroke-width: 9; }
+.ring .prog {
+  fill: none; stroke: var(--ring, var(--accent)); stroke-width: 9; stroke-linecap: round;
+  transition: stroke-dashoffset .3s linear, stroke .3s;
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--ring, var(--accent)) 45%, transparent));
+}
+.ring-face { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; gap: .15rem; }
+#clock {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: clamp(2.7rem, 11vw, 3.9rem); font-weight: 700;
+  letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+}
+#phase { font-size: .74rem; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--text-faint); }
+
+#focus-on {
+  display: block; margin: .2rem auto 0; max-width: 30ch;
+  font-size: .82rem; color: var(--text-dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#focus-on b { color: var(--text); font-weight: 600; }
+
+.controls { display: flex; justify-content: center; align-items: center; gap: .6rem; margin-top: 1.1rem; flex-wrap: wrap; }
+.btn {
+  font: inherit; font-weight: 600; font-size: .9rem; cursor: pointer;
+  border-radius: 11px; padding: .68rem 1.15rem; transition: .16s;
+  border: 1px solid var(--border); background: var(--surface-2); color: var(--text);
+}
+.btn:hover { border-color: var(--border-strong); transform: translateY(-1px); }
+.btn:active { transform: translateY(0); }
+.btn-primary {
+  background: var(--accent); border-color: var(--accent); color: #04141a;
+  min-width: 132px; box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+.btn-primary:hover { background: var(--accent-soft); border-color: var(--accent-soft); }
+.btn-ghost { background: none; }
+
+.meta { display: flex; justify-content: center; align-items: center; gap: 1.4rem; margin-top: 1.3rem; flex-wrap: wrap; font-size: .8rem; color: var(--text-dim); }
+.pips { display: flex; gap: .32rem; }
+.pip { width: 9px; height: 9px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border-strong); }
+.pip.on { background: var(--accent); border-color: var(--accent); }
+kbd {
+  font-family: 'JetBrains Mono', monospace; font-size: .7rem;
+  border: 1px solid var(--border-strong); border-bottom-width: 2px;
+  border-radius: 5px; padding: .1rem .35rem; color: var(--text-dim); background: var(--surface-2);
+}
+
+/* settings drawer */
+#settings[hidden] { display: none; }
+#settings {
+  margin-top: 1.4rem; padding-top: 1.3rem; border-top: 1px solid var(--border);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem;
+}
+.field { display: flex; flex-direction: column; gap: .35rem; }
+.field label { font-size: .72rem; font-weight: 600; letter-spacing: .07em; text-transform: uppercase; color: var(--text-faint); }
+.field input[type="number"] {
+  font: inherit; font-family: 'JetBrains Mono', monospace;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 9px; padding: .55rem .7rem; width: 100%;
+}
+.field input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.switch { display: flex; align-items: center; gap: .5rem; font-size: .84rem; color: var(--text-dim); align-self: end; padding-bottom: .55rem; }
+.switch input { accent-color: var(--accent); width: 16px; height: 16px; }
+
+/* ---------------- blocks ---------------- */
+.section-head { display: flex; align-items: flex-end; gap: 1rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+.section-head h2 { font-size: 1.45rem; font-weight: 700; letter-spacing: -.02em; }
+.section-head p { color: var(--text-dim); font-size: .875rem; }
+.head-actions { margin-left: auto; display: flex; gap: .5rem; }
+
+.day-progress { margin-bottom: 1.8rem; }
+.bar-track { height: 7px; border-radius: 99px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+.bar-fill { height: 100%; width: 0%; border-radius: 99px; background: linear-gradient(90deg, var(--accent), var(--success)); transition: width .35s ease; }
+.day-progress .legend { display: flex; justify-content: space-between; font-size: .78rem; color: var(--text-dim); margin-top: .5rem; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.1rem; padding-bottom: 3rem; }
+
+.block {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+  padding: 1.1rem 1.1rem 1rem; display: flex; flex-direction: column; gap: .85rem;
+  box-shadow: var(--shadow); transition: border-color .18s, transform .18s;
+}
+.block:hover { border-color: var(--border-strong); }
+.block.active { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent), var(--shadow); }
+.block.done .b-title { color: var(--text-faint); }
+
+.b-head { display: flex; align-items: center; gap: .6rem; }
+.b-num {
+  flex: none; width: 27px; height: 27px; border-radius: 8px; display: grid; place-items: center;
+  font-family: 'JetBrains Mono', monospace; font-size: .74rem; font-weight: 700;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text-faint);
+}
+.block.active .b-num { background: var(--accent); border-color: var(--accent); color: #04141a; }
+.block.done .b-num { background: color-mix(in srgb, var(--success) 18%, transparent); border-color: var(--success); color: var(--success); }
+
+.b-title { font-weight: 650; font-size: .98rem; letter-spacing: -.01em; flex: 1; min-width: 0; }
+.b-time {
+  font-family: 'JetBrains Mono', monospace; font-size: .72rem; color: var(--text-faint);
+  border: 1px dashed transparent; border-radius: 6px; padding: .1rem .3rem; white-space: nowrap;
+}
+[contenteditable] { outline: none; border-radius: 6px; }
+[contenteditable]:hover { background: var(--surface-2); }
+[contenteditable]:focus { background: var(--surface-2); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 50%, transparent); }
+
+.b-bar { height: 4px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.b-bar > i { display: block; height: 100%; width: 0%; background: var(--success); transition: width .3s ease; }
+
+.tasks { list-style: none; display: flex; flex-direction: column; gap: .1rem; min-height: 8px; }
+.task { display: flex; align-items: flex-start; gap: .6rem; padding: .32rem .3rem; border-radius: 8px; }
+.task:hover { background: var(--surface-2); }
+.task input[type="checkbox"] { margin-top: .28rem; width: 15px; height: 15px; accent-color: var(--success); cursor: pointer; flex: none; }
+.task span { font-size: .875rem; flex: 1; word-break: break-word; cursor: text; }
+.task.checked span { text-decoration: line-through; color: var(--text-faint); }
+.task .del {
+  border: 0; background: none; color: var(--text-faint); cursor: pointer;
+  font-size: 1rem; line-height: 1; padding: .1rem .25rem; border-radius: 5px; opacity: 0; transition: .14s;
+}
+.task:hover .del, .task .del:focus-visible { opacity: 1; }
+.task .del:hover { color: #f87171; background: color-mix(in srgb, #f87171 14%, transparent); }
+
+.empty { font-size: .82rem; color: var(--text-faint); font-style: italic; padding: .3rem; }
+
+.add { display: flex; gap: .4rem; }
+.add input {
+  font: inherit; font-size: .85rem; flex: 1; min-width: 0;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--text);
+  border-radius: 9px; padding: .5rem .7rem;
+}
+.add input::placeholder { color: var(--text-faint); }
+.add input:focus-visible { outline: none; border-color: var(--accent); }
+.add button { font: inherit; font-size: 1.05rem; line-height: 1; width: 36px; flex: none; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-dim); border-radius: 9px; cursor: pointer; }
+.add button:hover { color: var(--accent); border-color: var(--accent); }
+
+.b-foot { display: flex; align-items: center; gap: .5rem; margin-top: auto; }
+.b-count { font-size: .74rem; color: var(--text-faint); font-family: 'JetBrains Mono', monospace; }
+.b-focus {
+  margin-left: auto; font: inherit; font-size: .76rem; font-weight: 600; cursor: pointer;
+  border: 1px solid var(--border); background: none; color: var(--text-dim);
+  border-radius: 8px; padding: .3rem .65rem; transition: .16s;
+}
+.b-focus:hover { color: var(--accent); border-color: var(--accent); }
+.block.active .b-focus { color: var(--accent); border-color: var(--accent); }
+
+footer { border-top: 1px solid var(--border); padding: 1.6rem 0 2.4rem; }
+.foot { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; font-size: .82rem; color: var(--text-faint); }
+.foot a { color: var(--text-dim); }
+.foot .btn { margin-left: auto; font-size: .8rem; padding: .45rem .8rem; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 1.6rem; transform: translate(-50%, 140%);
+  background: var(--surface); border: 1px solid var(--border-strong); color: var(--text);
+  padding: .7rem 1.1rem; border-radius: 11px; box-shadow: var(--shadow);
+  font-size: .86rem; font-weight: 500; z-index: 90; transition: transform .3s cubic-bezier(.2,.9,.3,1);
+}
+.toast.show { transform: translate(-50%, 0); }
+
+@media (max-width: 560px) {
+  .bar nav a { display: none; }
+  .grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; animation: none !important; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="https://gazimasud.com/"><span class="dot"></span>Gazi Masud</a>
+    <nav>
+      <a href="#timer">Timer</a>
+      <a href="#blocks">Blocks</a>
+      <button class="icon-btn" id="theme-btn" title="Toggle theme" aria-label="Toggle theme">◐</button>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="hero">
+    <span class="eyebrow"><span class="dot" style="width:6px;height:6px;box-shadow:none"></span>Deep Work</span>
+    <h1>The <em>Block</em> Section</h1>
+    <p>Run the Pomodoro clock up top, then work down ten blocks — each with its own list. Everything saves to this browser automatically.</p>
+  </section>
+
+  <!-- ============ POMODORO ============ -->
+  <section class="timer-card" id="timer">
+    <div class="modes" role="tablist" aria-label="Timer mode">
+      <button role="tab" data-mode="focus" aria-selected="true">Focus</button>
+      <button role="tab" data-mode="short" aria-selected="false">Short Break</button>
+      <button role="tab" data-mode="long"  aria-selected="false">Long Break</button>
+    </div>
+
+    <div class="ring-wrap">
+      <svg class="ring" viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="track" cx="60" cy="60" r="53"></circle>
+        <circle class="prog"  cx="60" cy="60" r="53" id="ring-prog"></circle>
+      </svg>
+      <div class="ring-face">
+        <div id="clock" role="timer" aria-live="off">25:00</div>
+        <div id="phase">Focus Session</div>
+      </div>
+    </div>
+
+    <span id="focus-on">Working on <b>anything you like</b></span>
+
+    <div class="controls">
+      <button class="btn btn-primary" id="start-btn">Start</button>
+      <button class="btn" id="reset-btn">Reset</button>
+      <button class="btn" id="skip-btn">Skip</button>
+      <button class="btn btn-ghost icon-btn" id="gear-btn" title="Timer settings" aria-label="Timer settings" aria-expanded="false" style="width:auto;padding:.68rem .9rem">⚙</button>
+    </div>
+
+    <div class="meta">
+      <span>Session <b id="round">1</b> of <b id="round-max">4</b></span>
+      <span class="pips" id="pips" aria-hidden="true"></span>
+      <span>Today: <b id="done-count">0</b> pomodoros</span>
+      <span><kbd>Space</kbd> start/pause · <kbd>R</kbd> reset</span>
+    </div>
+
+    <div id="settings" hidden>
+      <div class="field"><label for="s-focus">Focus (min)</label><input type="number" id="s-focus" min="1" max="180" value="25" /></div>
+      <div class="field"><label for="s-short">Short break</label><input type="number" id="s-short" min="1" max="60" value="5" /></div>
+      <div class="field"><label for="s-long">Long break</label><input type="number" id="s-long" min="1" max="90" value="15" /></div>
+      <div class="field"><label for="s-rounds">Rounds to long</label><input type="number" id="s-rounds" min="2" max="12" value="4" /></div>
+      <label class="switch"><input type="checkbox" id="s-auto" checked /> Auto-start next</label>
+      <label class="switch"><input type="checkbox" id="s-sound" checked /> Chime on finish</label>
+    </div>
+  </section>
+
+  <!-- ============ BLOCKS ============ -->
+  <section id="blocks">
+    <div class="section-head">
+      <div>
+        <h2>Ten Blocks</h2>
+        <p>Rename any block, set its hours, and stack its tasks.</p>
+      </div>
+      <div class="head-actions">
+        <button class="btn" id="clear-done">Clear completed</button>
+        <button class="btn" id="reset-all">Reset day</button>
+      </div>
+    </div>
+
+    <div class="day-progress">
+      <div class="bar-track"><div class="bar-fill" id="day-fill"></div></div>
+      <div class="legend"><span id="day-text">0 of 0 tasks done</span><span id="day-pct">0%</span></div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap foot">
+    <span>Built by <a href="https://gazimasud.com/">Gazi Masud</a> · saved locally in your browser</span>
+    <button class="btn" id="export-btn">Copy as text</button>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(() => {
+  'use strict';
+  const $  = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const KEY = 'gm-block-section-v1';
+
+  /* ---------------- state ---------------- */
+  const DEFAULT_BLOCKS = [
+    ['Morning Kickoff',  '06:00 – 07:00'],
+    ['Deep Work I',      '07:00 – 09:00'],
+    ['Deep Work II',     '09:00 – 11:00'],
+    ['Admin & Inbox',    '11:00 – 12:00'],
+    ['Lunch & Reset',    '12:00 – 13:00'],
+    ['Build Session',    '13:00 – 15:00'],
+    ['Learning',         '15:00 – 16:00'],
+    ['Content & Writing','16:00 – 17:30'],
+    ['Review & Plan',    '17:30 – 18:30'],
+    ['Shutdown',         '18:30 – 19:00'],
+  ];
+
+  const fresh = () => ({
+    theme: 'dark',
+    settings: { focus: 25, short: 5, long: 15, rounds: 4, auto: true, sound: true },
+    stats: { date: today(), pomodoros: 0 },
+    activeBlock: null,
+    blocks: DEFAULT_BLOCKS.map(([title, time]) => ({ title, time, tasks: [] })),
+  });
+
+  function today() { return new Date().toISOString().slice(0, 10); }
+
+  let state;
+  try {
+    const raw = JSON.parse(localStorage.getItem(KEY) || 'null');
+    state = raw && Array.isArray(raw.blocks) ? { ...fresh(), ...raw } : fresh();
+    state.settings = { ...fresh().settings, ...(raw && raw.settings) };
+  } catch { state = fresh(); }
+
+  if (state.stats.date !== today()) state.stats = { date: today(), pomodoros: 0 };
+  while (state.blocks.length < 10) state.blocks.push({ title: 'Block', time: '', tasks: [] });
+  state.blocks = state.blocks.slice(0, 10);
+
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch {} };
+
+  /* ---------------- toast ---------------- */
+  let toastT;
+  function toast(msg) {
+    const el = $('#toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+
+  /* ---------------- theme ---------------- */
+  function applyTheme() {
+    document.documentElement.dataset.theme = state.theme;
+    $('#theme-btn').textContent = state.theme === 'dark' ? '◐' : '◑';
+  }
+  $('#theme-btn').addEventListener('click', () => {
+    state.theme = state.theme === 'dark' ? 'light' : 'dark';
+    applyTheme(); save();
+  });
+  applyTheme();
+
+  /* ================= POMODORO ================= */
+  const MODES = {
+    focus: { label: 'Focus Session', color: 'var(--accent)',  key: 'focus' },
+    short: { label: 'Short Break',   color: 'var(--success)', key: 'short' },
+    long:  { label: 'Long Break',    color: 'var(--warn)',    key: 'long'  },
+  };
+  const RING_LEN = 2 * Math.PI * 53;
+  $('#ring-prog').style.strokeDasharray = RING_LEN;
+
+  let mode = 'focus';
+  let running = false;
+  let total = state.settings.focus * 60;   // seconds in current phase
+  let left = total;                        // seconds remaining
+  let deadline = 0;                        // ms timestamp when running
+  let round = 1;        // focus round shown to the user (1..rounds)
+  let cycleDone = 0;    // focus sessions finished in the current cycle
+  let tick = null;
+
+  const pad = n => String(n).padStart(2, '0');
+  const fmt = s => `${pad(Math.floor(s / 60))}:${pad(s % 60)}`;
+
+  function durationFor(m) { return Math.max(1, state.settings[MODES[m].key]) * 60; }
+
+  function paint() {
+    const secs = Math.max(0, Math.ceil(left));
+    $('#clock').textContent = fmt(secs);
+    $('#phase').textContent = MODES[mode].label;
+    $('#ring-prog').style.setProperty('--ring', MODES[mode].color);
+    $('#ring-prog').style.strokeDashoffset = RING_LEN * (1 - (total ? secs / total : 0));
+    $('#start-btn').textContent = running ? 'Pause' : (secs === total ? 'Start' : 'Resume');
+    $('#round').textContent = round;
+    $('#round-max').textContent = state.settings.rounds;
+    $('#done-count').textContent = state.stats.pomodoros;
+    document.title = running ? `${fmt(secs)} · ${MODES[mode].label}` : 'Block Section — Gazi Masud';
+
+    const pips = $('#pips');
+    if (pips.children.length !== state.settings.rounds) {
+      pips.innerHTML = Array.from({ length: state.settings.rounds }, () => '<span class="pip"></span>').join('');
+    }
+    $$('.pip', pips).forEach((p, i) => p.classList.toggle('on', i < cycleDone));
+  }
+
+  function setMode(m, { keepRunning = false } = {}) {
+    mode = m;
+    total = durationFor(m);
+    left = total;
+    $$('.modes button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.mode === m)));
+    if (keepRunning) { deadline = Date.now() + left * 1000; }
+    else { stop(); }
+    paint();
+  }
+
+  function loop() {
+    left = Math.max(0, (deadline - Date.now()) / 1000);
+    paint();
+    if (left <= 0) finish();
+  }
+
+  function start() {
+    if (running) return;
+    running = true;
+    deadline = Date.now() + left * 1000;
+    tick = setInterval(loop, 250);
+    paint();
+  }
+
+  function pause() {
+    if (!running) return;
+    running = false;
+    left = Math.max(0, (deadline - Date.now()) / 1000);
+    clearInterval(tick); tick = null;
+    paint();
+  }
+
+  function stop() {
+    running = false;
+    clearInterval(tick); tick = null;
+  }
+
+  function finish() {
+    stop();
+    chime();
+    if (mode === 'focus') {
+      state.stats.pomodoros++;
+      cycleDone++;
+      const isLong = cycleDone >= state.settings.rounds;
+      if (!isLong) round = Math.min(round + 1, state.settings.rounds);
+      save();
+      setMode(isLong ? 'long' : 'short');
+      toast(isLong ? 'Long break — step away 🎉' : 'Focus done. Take a short break.');
+    } else {
+      if (mode === 'long') { cycleDone = 0; round = 1; }
+      setMode('focus');
+      toast('Break over. Back to the block.');
+    }
+    if (state.settings.auto) start();
+    paint();
+  }
+
+  function chime() {
+    if (!state.settings.sound) return;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      const ctx = new AC();
+      [0, .18, .36].forEach((t, i) => {
+        const o = ctx.createOscillator(), g = ctx.createGain();
+        o.type = 'sine';
+        o.frequency.value = [660, 880, 1046][i];
+        g.gain.setValueAtTime(0.0001, ctx.currentTime + t);
+        g.gain.exponentialRampToValueAtTime(0.22, ctx.currentTime + t + .02);
+        g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + t + .3);
+        o.connect(g).connect(ctx.destination);
+        o.start(ctx.currentTime + t); o.stop(ctx.currentTime + t + .32);
+      });
+      setTimeout(() => ctx.close(), 1200);
+    } catch {}
+  }
+
+  $('#start-btn').addEventListener('click', () => running ? pause() : start());
+  $('#reset-btn').addEventListener('click', () => { setMode(mode); toast('Timer reset'); });
+  $('#skip-btn').addEventListener('click', finish);
+  $$('.modes button').forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+  $('#gear-btn').addEventListener('click', e => {
+    const box = $('#settings');
+    box.hidden = !box.hidden;
+    e.currentTarget.setAttribute('aria-expanded', String(!box.hidden));
+  });
+
+  const SETTING_INPUTS = { 's-focus': 'focus', 's-short': 'short', 's-long': 'long', 's-rounds': 'rounds' };
+  Object.entries(SETTING_INPUTS).forEach(([id, key]) => {
+    const el = document.getElementById(id);
+    el.value = state.settings[key];
+    el.addEventListener('change', () => {
+      const v = Math.max(1, Math.min(180, parseInt(el.value, 10) || state.settings[key]));
+      el.value = v; state.settings[key] = v; save();
+      if (round > state.settings.rounds) { round = 1; cycleDone = 0; }
+      if (!running) setMode(mode); else paint();
+    });
+  });
+  $('#s-auto').checked = state.settings.auto;
+  $('#s-sound').checked = state.settings.sound;
+  $('#s-auto').addEventListener('change', e => { state.settings.auto = e.target.checked; save(); });
+  $('#s-sound').addEventListener('change', e => { state.settings.sound = e.target.checked; save(); });
+
+  document.addEventListener('keydown', e => {
+    const typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable;
+    if (typing || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.code === 'Space') { e.preventDefault(); running ? pause() : start(); }
+    else if (e.key.toLowerCase() === 'r') { setMode(mode); toast('Timer reset'); }
+  });
+
+  /* ================= BLOCKS ================= */
+  const grid = $('#grid');
+
+  function focusLabel() {
+    const b = state.blocks[state.activeBlock];
+    $('#focus-on').innerHTML = b
+      ? `Working on <b>${esc(b.title || 'Untitled block')}</b>`
+      : 'Working on <b>anything you like</b>';
+  }
+
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  function render() {
+    grid.innerHTML = state.blocks.map((b, i) => {
+      const done = b.tasks.filter(t => t.done).length;
+      const pct = b.tasks.length ? Math.round(done / b.tasks.length * 100) : 0;
+      const complete = b.tasks.length > 0 && done === b.tasks.length;
+      return `
+      <article class="block${state.activeBlock === i ? ' active' : ''}${complete ? ' done' : ''}" data-block="${i}">
+        <div class="b-head">
+          <span class="b-num">${pad(i + 1)}</span>
+          <span class="b-title" contenteditable="plaintext-only" data-edit="title" role="textbox" aria-label="Block ${i + 1} title">${esc(b.title)}</span>
+          <span class="b-time" contenteditable="plaintext-only" data-edit="time" role="textbox" aria-label="Block ${i + 1} time">${esc(b.time || '--:--')}</span>
+        </div>
+        <div class="b-bar"><i style="width:${pct}%"></i></div>
+        <ul class="tasks">
+          ${b.tasks.length ? b.tasks.map((t, j) => `
+            <li class="task${t.done ? ' checked' : ''}" data-task="${j}">
+              <input type="checkbox" ${t.done ? 'checked' : ''} aria-label="${esc(t.text)}" />
+              <span contenteditable="plaintext-only" data-edit="task">${esc(t.text)}</span>
+              <button class="del" title="Delete task" aria-label="Delete task">×</button>
+            </li>`).join('')
+            : '<li class="empty">No tasks yet — add the first one.</li>'}
+        </ul>
+        <form class="add" autocomplete="off">
+          <input type="text" placeholder="Add a task…" aria-label="Add a task to block ${i + 1}" maxlength="140" />
+          <button type="submit" title="Add task" aria-label="Add task">+</button>
+        </form>
+        <div class="b-foot">
+          <span class="b-count">${done}/${b.tasks.length}</span>
+          <button class="b-focus">${state.activeBlock === i ? '● Focusing' : 'Focus this'}</button>
+        </div>
+      </article>`;
+    }).join('');
+    renderDay();
+    focusLabel();
+  }
+
+  function renderDay() {
+    const all = state.blocks.flatMap(b => b.tasks);
+    const done = all.filter(t => t.done).length;
+    const pct = all.length ? Math.round(done / all.length * 100) : 0;
+    $('#day-fill').style.width = pct + '%';
+    $('#day-text').textContent = `${done} of ${all.length} task${all.length === 1 ? '' : 's'} done`;
+    $('#day-pct').textContent = pct + '%';
+  }
+
+  const blockIndex = el => +el.closest('[data-block]').dataset.block;
+
+  grid.addEventListener('submit', e => {
+    e.preventDefault();
+    const input = $('input[type="text"]', e.target);
+    const text = input.value.trim();
+    if (!text) return;
+    state.blocks[blockIndex(e.target)].tasks.push({ text, done: false });
+    save(); render();
+    const box = grid.querySelector(`[data-block="${blockIndex(e.target)}"] .add input`);
+    if (box) box.focus();
+  });
+
+  grid.addEventListener('change', e => {
+    if (e.target.type !== 'checkbox') return;
+    const li = e.target.closest('.task');
+    state.blocks[blockIndex(li)].tasks[+li.dataset.task].done = e.target.checked;
+    save(); render();
+  });
+
+  grid.addEventListener('click', e => {
+    if (e.target.matches('.del')) {
+      const li = e.target.closest('.task');
+      state.blocks[blockIndex(li)].tasks.splice(+li.dataset.task, 1);
+      save(); render();
+    } else if (e.target.matches('.b-focus')) {
+      const i = blockIndex(e.target);
+      state.activeBlock = state.activeBlock === i ? null : i;
+      save(); render();
+      if (state.activeBlock === i) toast(`Focusing: ${state.blocks[i].title}`);
+    }
+  });
+
+  grid.addEventListener('blur', e => {
+    const kind = e.target.dataset && e.target.dataset.edit;
+    if (!kind) return;
+    const i = blockIndex(e.target);
+    const val = e.target.textContent.trim();
+
+    if (kind === 'title') {
+      state.blocks[i].title = val || `Block ${i + 1}`;
+      e.target.textContent = state.blocks[i].title;
+      save(); focusLabel(); return;                 // no re-render: keeps the next click alive
+    }
+    if (kind === 'time') {
+      state.blocks[i].time = val === '--:--' ? '' : val;
+      e.target.textContent = state.blocks[i].time || '--:--';
+      save(); return;
+    }
+    if (kind === 'task') {
+      const j = +e.target.closest('.task').dataset.task;
+      const task = state.blocks[i].tasks[j];
+      if (!task) return;
+      if (val) { task.text = val; e.target.textContent = val; save(); return; }
+      state.blocks[i].tasks.splice(j, 1);            // emptied out = delete
+      save(); render();
+    }
+  }, true);
+
+  grid.addEventListener('keydown', e => {
+    if (e.target.isContentEditable && e.key === 'Enter') { e.preventDefault(); e.target.blur(); }
+  });
+
+  $('#clear-done').addEventListener('click', () => {
+    const n = state.blocks.flatMap(b => b.tasks).filter(t => t.done).length;
+    if (!n) return toast('Nothing completed yet');
+    state.blocks.forEach(b => { b.tasks = b.tasks.filter(t => !t.done); });
+    save(); render(); toast(`Cleared ${n} completed task${n === 1 ? '' : 's'}`);
+  });
+
+  $('#reset-all').addEventListener('click', () => {
+    if (!confirm('Reset every block back to the default plan? Your tasks will be deleted.')) return;
+    const theme = state.theme;
+    state = fresh(); state.theme = theme;
+    save(); render(); setMode('focus'); toast('Fresh day, fresh blocks');
+  });
+
+  $('#export-btn').addEventListener('click', async () => {
+    const text = state.blocks.map((b, i) =>
+      `${pad(i + 1)}. ${b.title}${b.time ? `  (${b.time})` : ''}\n` +
+      (b.tasks.length ? b.tasks.map(t => `   [${t.done ? 'x' : ' '}] ${t.text}`).join('\n') : '   (empty)')
+    ).join('\n\n');
+    try { await navigator.clipboard.writeText(text); toast('Copied to clipboard'); }
+    catch { toast('Copy failed — clipboard blocked'); }
+  });
+
+  /* ---------------- go ---------------- */
+  render();
+  setMode('focus');
+})();
+</script>
+</body>
+</html>
