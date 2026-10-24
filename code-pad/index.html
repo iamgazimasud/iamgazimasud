@@ -91,6 +91,7 @@ button { cursor: pointer; }
   border: 0; border-radius: 8px; background: transparent; color: var(--fg);
 }
 .icon-btn:active { background: var(--key); }
+.icon-btn[aria-pressed="true"] { color: var(--accent); }
 .icon-btn svg { width: 22px; height: 22px; }
 #fileName {
   flex: 1; min-width: 0; height: 40px; padding: 0 8px; border: 1px solid transparent; border-radius: 8px;
@@ -253,6 +254,9 @@ body.kb-open .keybar { padding-bottom: 6px; }
     </button>
     <input id="fileName" aria-label="File name" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
     <select id="lang" aria-label="Language"></select>
+    <button class="icon-btn" id="keysBtn" aria-label="Show code keys" aria-pressed="false">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
+    </button>
     <button class="run" id="runBtn" aria-label="Run code">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>Run
     </button>
@@ -283,7 +287,7 @@ body.kb-open .keybar { padding-bottom: 6px; }
     </section>
   </main>
 
-  <nav class="keybar" id="keybar" aria-label="Code keys">
+  <nav class="keybar" id="keybar" aria-label="Code keys" hidden>
     <div class="row" id="row1"></div>
     <div class="row" id="row2"></div>
   </nav>
@@ -446,7 +450,7 @@ body.kb-open .keybar { padding-bottom: 6px; }
   const uid = () => Math.random().toString(36).slice(2, 10);
   function seed() {
     const files = SAMPLES.map((s, i) => ({ id: uid(), name: s.name, lang: s.lang, code: s.code, updated: Date.now() - i * 60000 }));
-    return { files, current: files[0].id, fontSize: 16, indent: 'auto', autoClose: true, theme: 'system' };
+    return { files, current: files[0].id, fontSize: 16, indent: 'auto', autoClose: true, theme: 'system', showKeys: false };
   }
   function loadState() {
     try {
@@ -868,6 +872,14 @@ body.kb-open .keybar { padding-bottom: 6px; }
     act(b);
   });
 
+  function applyKeys() {
+    keybar.hidden = !state.showKeys;
+    const b = $('#keysBtn');
+    b.setAttribute('aria-pressed', String(state.showKeys));
+    b.setAttribute('aria-label', state.showKeys ? 'Hide code keys' : 'Show code keys');
+  }
+  $('#keysBtn').addEventListener('click', () => { state.showKeys = !state.showKeys; applyKeys(); save(); });
+
   // ---------- Running code ----------
   const out = $('#output'), con = $('#console'), frame = $('#preview');
   function openOutput(kind) {
@@ -1158,6 +1170,7 @@ body.kb-open .keybar { padding-bottom: 6px; }
 
   // ---------- Boot ----------
   buildRows();
+  applyKeys();
   renderSettings();
   loadFile();
   fit();

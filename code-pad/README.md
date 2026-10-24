@@ -4,7 +4,7 @@ A code editor for practising on a phone. It is one HTML file with no build step.
 
 ## Features
 
-- Two rows of code keys above the phone keyboard:
+- Optional code keys above the phone keyboard (hidden by default; tap the keyboard button in the header to show them):
   - Tab, arrow keys (hold to repeat), Select mode, Undo/Redo, outdent, Home/End, comment, duplicate line, select all
   - Every symbol you need for code: `{ } ( ) [ ] ; = " ' < > : , . + - * / \ | & ! ? _ # $ % ^ ~ @`
   - Snippets for each language, such as `console.log()`, `def`, `for` loops, `printf`, and HTML tags
