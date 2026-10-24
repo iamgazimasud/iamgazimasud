@@ -91,7 +91,6 @@ button { cursor: pointer; }
   border: 0; border-radius: 8px; background: transparent; color: var(--fg);
 }
 .icon-btn:active { background: var(--key); }
-.icon-btn[aria-pressed="true"] { color: var(--accent); }
 .icon-btn svg { width: 22px; height: 22px; }
 #fileName {
   flex: 1; min-width: 0; height: 40px; padding: 0 8px; border: 1px solid transparent; border-radius: 8px;
@@ -170,33 +169,6 @@ button { cursor: pointer; }
 #console .meta { color: var(--muted); font-size: 12px; border: 0; padding-top: 8px; }
 #preview { flex: 1; min-height: 0; width: 100%; border: 0; background: #fff; }
 
-/* Keycap bar */
-.keybar {
-  flex: none; display: grid; gap: 6px; background: var(--panel); border-top: 1px solid var(--line);
-  padding: 6px 0 max(6px, env(safe-area-inset-bottom, 0px));
-}
-body.kb-open .keybar { padding-bottom: 6px; }
-.row {
-  display: flex; gap: 5px; overflow-x: auto; scrollbar-width: none; touch-action: pan-x;
-  overscroll-behavior-x: contain;
-  padding: 0 max(6px, env(safe-area-inset-right, 0px)) 2px max(6px, env(safe-area-inset-left, 0px));
-}
-.row::-webkit-scrollbar { display: none; }
-.k {
-  flex: none; min-width: 40px; height: 40px; padding: 0 10px;
-  display: grid; place-items: center;
-  border: 0; border-radius: 7px; background: var(--key); color: var(--fg);
-  box-shadow: 0 2px 0 var(--key-edge);
-  font: 500 17px var(--font-code); user-select: none; -webkit-user-select: none; touch-action: pan-x;
-}
-.k.act { font: 600 13px var(--font-ui); color: var(--accent); letter-spacing: .02em; }
-.k.act svg { width: 18px; height: 18px; }
-.k.snip { font-size: 14px; color: var(--syn-fn); }
-.k.on { background: var(--accent); color: var(--accent-ink); }
-.k.pressed { transform: translateY(2px); box-shadow: none; background: var(--line); }
-.k.on.pressed { background: var(--accent); }
-.sep { flex: none; width: 1px; margin: 6px 2px; background: var(--line); }
-
 /* Drawer */
 .scrim { position: fixed; inset: 0; background: rgba(5, 8, 12, .5); z-index: 20; }
 .drawer {
@@ -254,9 +226,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
     </button>
     <input id="fileName" aria-label="File name" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false">
     <select id="lang" aria-label="Language"></select>
-    <button class="icon-btn" id="keysBtn" aria-label="Show code keys" aria-pressed="false">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>
-    </button>
     <button class="run" id="runBtn" aria-label="Run code">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.4-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></svg>Run
     </button>
@@ -286,11 +255,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
       <iframe id="preview" title="HTML preview" sandbox="allow-scripts allow-modals" hidden></iframe>
     </section>
   </main>
-
-  <nav class="keybar" id="keybar" aria-label="Code keys" hidden>
-    <div class="row" id="row1"></div>
-    <div class="row" id="row2"></div>
-  </nav>
 </div>
 
 <div class="scrim" id="scrim" hidden></div>
@@ -346,49 +310,42 @@ body.kb-open .keybar { padding-bottom: 6px; }
       label: 'JS', name: 'JavaScript', ext: 'js', indent: 2, line: '//', block: ['/*', '*/'], backtick: true,
       kw: words('break case catch class const continue debugger default delete do else export extends finally for function if import in instanceof let new of return static super switch throw try typeof var void while with yield async await get set from as'),
       lit: words('true false null undefined NaN Infinity this'),
-      bi: words('console Math JSON Array Object String Number Boolean Promise Date Map Set RegExp Symbol Error parseInt parseFloat setTimeout setInterval clearTimeout clearInterval document window alert require module'),
-      snips: [['=>', '=> '], ['log', 'console.log($0)'], ['const', 'const '], ['let', 'let '], ['fn', 'function $0() {\n\t\n}'], ['if', 'if ($0) {\n\t\n}'], ['for', 'for (let i = 0; i < $0; i++) {\n\t\n}'], ['of', 'for (const $0 of ) {\n\t\n}'], ['===', ' === '], ['!==', ' !== '], ['&&', ' && '], ['||', ' || '], ['return', 'return ']]
+      bi: words('console Math JSON Array Object String Number Boolean Promise Date Map Set RegExp Symbol Error parseInt parseFloat setTimeout setInterval clearTimeout clearInterval document window alert require module')
     },
     python: {
       label: 'Python', name: 'Python', ext: 'py', indent: 4, line: '#', triple: true,
       kw: words('and as assert async await break class continue def del elif else except finally for from global if import in is lambda nonlocal not or pass raise return try while with yield match case'),
       lit: words('True False None self'),
-      bi: words('print len range int str float list dict set tuple input open enumerate zip map filter sorted sum min max abs type isinstance round'),
-      snips: [['def', 'def $0():\n\t'], ['print', 'print($0)'], ['if', 'if $0:\n\t'], ['elif', 'elif $0:\n\t'], ['else', 'else:\n\t'], ['for', 'for i in range($0):\n\t'], ['while', 'while $0:\n\t'], ['==', ' == '], ['!=', ' != '], ['f""', 'f"$0"'], ['self.', 'self.'], ['return', 'return ']]
+      bi: words('print len range int str float list dict set tuple input open enumerate zip map filter sorted sum min max abs type isinstance round')
     },
     html: {
-      label: 'HTML', name: 'HTML', ext: 'html', indent: 2,
-      snips: [['<>', '<$0>'], ['</>', '</$0>'], ['div', '<div>$0</div>'], ['p', '<p>$0</p>'], ['h1', '<h1>$0</h1>'], ['a', '<a href="$0"></a>'], ['button', '<button>$0</button>'], ['class', ' class="$0"'], ['id', ' id="$0"'], ['style', '<style>\n\t$0\n</style>'], ['script', '<script>\n\t$0\n<\/script>'], ['<!-- -->', '<!-- $0 -->']]
+      label: 'HTML', name: 'HTML', ext: 'html', indent: 2
     },
     css: {
       label: 'CSS', name: 'CSS', ext: 'css', indent: 2, block: ['/*', '*/'], css: true,
       kw: words('@media @import @keyframes @font-face @supports @layer'),
       lit: words('auto none inherit initial block inline flex grid absolute relative fixed sticky center bold solid'),
-      bi: words('var calc rgb rgba hsl min max clamp url'),
-      snips: [['{}', ' {\n\t$0\n}'], ['px', 'px'], ['rem', 'rem'], ['%', '%'], ['color', 'color: $0;'], ['bg', 'background: $0;'], ['display', 'display: $0;'], ['flex', 'display: flex;'], ['margin', 'margin: $0;'], ['padding', 'padding: $0;'], ['font-size', 'font-size: $0;']]
+      bi: words('var calc rgb rgba hsl min max clamp url')
     },
     c: {
       label: 'C', name: 'C', ext: 'c', indent: 4, line: '//', block: ['/*', '*/'], pre: true,
       kw: words('auto break case char const continue default do double else enum extern float for goto if inline int long register return short signed sizeof static struct switch typedef union unsigned void volatile while bool'),
       lit: words('NULL true false'),
-      bi: words('printf scanf malloc free strlen strcpy strcmp puts gets fopen fclose'),
-      snips: [['#include', '#include <$0>'], ['main', 'int main(void) {\n\t$0\n\treturn 0;\n}'], ['printf', 'printf("$0\\n");'], ['scanf', 'scanf("%d", &$0);'], ['for', 'for (int i = 0; i < $0; i++) {\n\t\n}'], ['if', 'if ($0) {\n\t\n}'], ['==', ' == '], ['&&', ' && '], ['||', ' || '], ['->', '->']]
+      bi: words('printf scanf malloc free strlen strcpy strcmp puts gets fopen fclose')
     },
     cpp: {
       label: 'C++', name: 'C++', ext: 'cpp', indent: 4, line: '//', block: ['/*', '*/'], pre: true,
       kw: words('auto break case char const continue default do double else enum extern float for goto if inline int long return short signed sizeof static struct switch typedef union unsigned void volatile while bool class namespace using public private protected virtual template typename new delete operator friend try catch throw override final constexpr'),
       lit: words('NULL nullptr true false this'),
-      bi: words('std cout cin endl string vector map set pair printf'),
-      snips: [['#include', '#include <$0>'], ['main', 'int main() {\n\t$0\n\treturn 0;\n}'], ['cout', 'std::cout << $0 << std::endl;'], ['cin', 'std::cin >> $0;'], ['for', 'for (int i = 0; i < $0; i++) {\n\t\n}'], ['if', 'if ($0) {\n\t\n}'], ['::', '::'], ['<<', ' << '], ['==', ' == '], ['&&', ' && '], ['->', '->']]
+      bi: words('std cout cin endl string vector map set pair printf')
     },
     java: {
       label: 'Java', name: 'Java', ext: 'java', indent: 4, line: '//', block: ['/*', '*/'],
       kw: words('abstract assert boolean break byte case catch char class const continue default do double else enum extends final finally float for if implements import instanceof int interface long native new package private protected public return short static super switch synchronized throw throws transient try void volatile while var record'),
       lit: words('true false null this'),
-      bi: words('System String Math Integer List ArrayList HashMap Scanner'),
-      snips: [['class', 'public class $0 {\n\t\n}'], ['main', 'public static void main(String[] args) {\n\t$0\n}'], ['println', 'System.out.println($0);'], ['for', 'for (int i = 0; i < $0; i++) {\n\t\n}'], ['if', 'if ($0) {\n\t\n}'], ['==', ' == '], ['&&', ' && '], ['||', ' || '], ['return', 'return ']]
+      bi: words('System String Math Integer List ArrayList HashMap Scanner')
     },
-    text: { label: 'Text', name: 'Plain text', ext: 'txt', indent: 2, snips: [] }
+    text: { label: 'Text', name: 'Plain text', ext: 'txt', indent: 2 }
   };
   for (const id in LANGS) LANGS[id].id = id;
   const EXT = {};
@@ -450,7 +407,7 @@ body.kb-open .keybar { padding-bottom: 6px; }
   const uid = () => Math.random().toString(36).slice(2, 10);
   function seed() {
     const files = SAMPLES.map((s, i) => ({ id: uid(), name: s.name, lang: s.lang, code: s.code, updated: Date.now() - i * 60000 }));
-    return { files, current: files[0].id, fontSize: 16, indent: 'auto', autoClose: true, theme: 'system', showKeys: false };
+    return { files, current: files[0].id, fontSize: 16, indent: 'auto', autoClose: true, theme: 'system' };
   }
   function loadState() {
     try {
@@ -592,11 +549,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
     afterEdit();
   }
   function afterEdit() { render(); saveSoon(); }
-  function setCaret(a, b, dir) {
-    if (document.activeElement !== ta) ta.focus({ preventScroll: true });
-    ta.setSelectionRange(a, b == null ? a : b, dir || 'none');
-    syncScroll();
-  }
   const lineStart = (v, p) => v.lastIndexOf('\n', p - 1) + 1;
   const lineEnd = (v, p) => { const i = v.indexOf('\n', p); return i < 0 ? v.length : i; };
   const leadWS = (s) => /^[ \t]*/.exec(s)[0];
@@ -683,62 +635,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
     const block = v.slice(ls, le);
     replaceRange(le, le, '\n' + block, s + block.length + 1, e + block.length + 1);
   }
-  function insertSnippet(t) {
-    const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
-    const ind = leadWS(v.slice(lineStart(v, s), s));
-    let text = t.replace(/\t/g, unit()).replace(/\n/g, '\n' + ind);
-    let at = text.indexOf('$0');
-    if (at < 0) { replaceRange(s, e, text, s + text.length); return; }
-    const picked = v.slice(s, e);
-    text = text.slice(0, at) + picked + text.slice(at + 2);
-    replaceRange(s, e, text, s + at, s + at + picked.length);
-  }
-  function typeSym(ch) {
-    const v = ta.value, s = ta.selectionStart, e = ta.selectionEnd;
-    if (state.autoClose) {
-      const close = PAIRS[ch];
-      if (close && s !== e) return replaceRange(s, e, ch + v.slice(s, e) + close, s + 1, e + 1);
-      if (s === e && CLOSERS.has(ch) && v[s] === ch) return setCaret(s + 1);
-      if (close && canPair(ch, v, s, e)) return replaceRange(s, e, ch + close, s + 1);
-    }
-    if (s === e && '}])'.includes(ch)) {
-      const before = v.slice(lineStart(v, s), s);
-      const u = unit();
-      if (before.length >= u.length && /^[ \t]+$/.test(before)) {
-        return replaceRange(s - u.length, s, ch, s - u.length + 1);
-      }
-    }
-    replaceRange(s, e, ch, s + ch.length);
-  }
-
-  // ---------- Caret movement ----------
-  let selMode = false;
-  function moveCaret(kind) {
-    const v = ta.value;
-    let s = ta.selectionStart, e = ta.selectionEnd;
-    const back = ta.selectionDirection === 'backward';
-    let anchor = back ? e : s, head = back ? s : e;
-    if (!selMode && s !== e) {
-      if (kind === 'left' || kind === 'up') return setCaret(s);
-      if (kind === 'right' || kind === 'down') return setCaret(e);
-    }
-    const ls = lineStart(v, head), col = head - ls;
-    if (kind === 'left') head = Math.max(0, head - 1);
-    else if (kind === 'right') head = Math.min(v.length, head + 1);
-    else if (kind === 'up') {
-      if (ls === 0) head = 0;
-      else { const pls = lineStart(v, ls - 1); head = Math.min(pls + col, ls - 1); }
-    } else if (kind === 'down') {
-      const le = lineEnd(v, head);
-      if (le === v.length) head = v.length;
-      else { const nle = lineEnd(v, le + 1); head = Math.min(le + 1 + col, nle); }
-    } else if (kind === 'home') {
-      const first = ls + leadWS(v.slice(ls, lineEnd(v, ls))).length;
-      head = head === first ? ls : first;
-    } else if (kind === 'end') head = lineEnd(v, head);
-    if (selMode) setCaret(Math.min(anchor, head), Math.max(anchor, head), head < anchor ? 'backward' : 'forward');
-    else setCaret(head);
-  }
 
   // ---------- Typing from the phone keyboard ----------
   ta.addEventListener('beforeinput', (e) => {
@@ -796,89 +692,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
     else if ((e.ctrlKey || e.metaKey) && e.key === '/') { e.preventDefault(); toggleComment(); }
     else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'd') { e.preventDefault(); duplicate(); }
   });
-
-  // ---------- Keycap bar ----------
-  const ICON = {
-    undo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></svg>',
-    redo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14l5-5-5-5"/><path d="M20 9H10a6 6 0 0 0 0 12h3"/></svg>'
-  };
-  const ROW1 = [
-    ['tab', 'Tab'], ['left', '←', 1], ['up', '↑', 1], ['down', '↓', 1], ['right', '→', 1], ['sel', 'Select'],
-    ['undo', ICON.undo, 1], ['redo', ICON.redo, 1], '|',
-    ['outdent', '⇤ Tab'], ['home', 'Home'], ['end', 'End'], ['comment', '// Comment'], ['dup', 'Copy line'], ['all', 'Select all']
-  ];
-  const SYMBOLS = ['{', '}', '(', ')', '[', ']', ';', '=', '"', "'", '<', '>', ':', ',', '.', '+', '-', '*', '/', '\\', '|', '&', '!', '?', '_', '#', '`', '$', '%', '^', '~', '@'];
-  function buildRows() {
-    const r1 = $('#row1'), r2 = $('#row2');
-    r1.innerHTML = ROW1.map((k) => k === '|' ? '<span class="sep"></span>' :
-      '<button class="k act" tabindex="-1" data-a="' + k[0] + '"' + (k[2] ? ' data-rep="1"' : '') + (k[0] === 'sel' ? ' aria-pressed="false"' : '') + ' aria-label="' + (k[0] === 'undo' || k[0] === 'redo' ? k[0] : '') + '">' + k[1] + '</button>').join('');
-    buildRow2();
-  }
-  function buildRow2() {
-    const r2 = $('#row2');
-    const syms = SYMBOLS.map((c) => '<button class="k" tabindex="-1" data-s="' + esc(c).replace(/"/g, '&quot;') + '">' + esc(c) + '</button>').join('');
-    const snips = lang().snips.map((s, i) => '<button class="k snip" tabindex="-1" data-snip="' + i + '">' + esc(s[0]) + '</button>').join('');
-    r2.innerHTML = syms + (snips ? '<span class="sep"></span>' + snips : '');
-    r2.scrollLeft = 0;
-  }
-  function act(b) {
-    if (b.dataset.s != null) return typeSym(b.dataset.s);
-    if (b.dataset.snip != null) return insertSnippet(lang().snips[+b.dataset.snip][1]);
-    const a = b.dataset.a;
-    switch (a) {
-      case 'tab': return indent();
-      case 'outdent': return outdent();
-      case 'left': case 'right': case 'up': case 'down': case 'home': case 'end': return moveCaret(a);
-      case 'sel':
-        selMode = !selMode;
-        b.classList.toggle('on', selMode);
-        b.setAttribute('aria-pressed', String(selMode));
-        if (!selMode) setCaret(ta.selectionDirection === 'backward' ? ta.selectionStart : ta.selectionEnd);
-        return;
-      case 'undo': case 'redo':
-        ta.focus({ preventScroll: true });
-        try { document.execCommand(a); } catch (e) {}
-        return afterEdit();
-      case 'comment': return toggleComment();
-      case 'dup': return duplicate();
-      case 'all': ta.focus({ preventScroll: true }); ta.select(); return;
-    }
-  }
-  const keybar = $('#keybar');
-  let holdT = 0, holdI = 0, repeated = false;
-  function stopHold() {
-    clearTimeout(holdT); clearInterval(holdI);
-    keybar.querySelectorAll('.pressed').forEach((x) => x.classList.remove('pressed'));
-  }
-  keybar.addEventListener('pointerdown', (e) => {
-    const b = e.target.closest('.k');
-    if (!b) return;
-    e.preventDefault();
-    repeated = false;
-    b.classList.add('pressed');
-    if (b.dataset.rep) {
-      holdT = setTimeout(() => {
-        repeated = true; act(b);
-        holdI = setInterval(() => act(b), 55);
-      }, 380);
-    }
-  });
-  keybar.addEventListener('mousedown', (e) => e.preventDefault());
-  ['pointerup', 'pointercancel', 'pointerleave'].forEach((t) => keybar.addEventListener(t, stopHold));
-  keybar.addEventListener('click', (e) => {
-    const b = e.target.closest('.k');
-    if (!b) return;
-    if (repeated) { repeated = false; return; }
-    act(b);
-  });
-
-  function applyKeys() {
-    keybar.hidden = !state.showKeys;
-    const b = $('#keysBtn');
-    b.setAttribute('aria-pressed', String(state.showKeys));
-    b.setAttribute('aria-label', state.showKeys ? 'Hide code keys' : 'Show code keys');
-  }
-  $('#keysBtn').addEventListener('click', () => { state.showKeys = !state.showKeys; applyKeys(); save(); });
 
   // ---------- Running code ----------
   const out = $('#output'), con = $('#console'), frame = $('#preview');
@@ -1024,7 +837,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
     render();
     ta.scrollTop = 0; ta.scrollLeft = 0;
     syncScroll();
-    buildRow2();
     out.hidden = true;
   }
   function uniqueName(base, ext) {
@@ -1049,7 +861,7 @@ body.kb-open .keybar { padding-bottom: 6px; }
     f.name = nameIn.value.trim() || 'untitled.' + LANGS[f.lang].ext;
     nameIn.value = f.name;
     const ext = (f.name.split('.').pop() || '').toLowerCase();
-    if (f.name.includes('.') && EXT[ext] && EXT[ext] !== f.lang) { f.lang = EXT[ext]; langSel.value = f.lang; render(); buildRow2(); }
+    if (f.name.includes('.') && EXT[ext] && EXT[ext] !== f.lang) { f.lang = EXT[ext]; langSel.value = f.lang; render(); }
     f.updated = Date.now();
     save();
   });
@@ -1061,7 +873,7 @@ body.kb-open .keybar { padding-bottom: 6px; }
     if (f.name.includes('.') && EXT[ext]) f.name = f.name.slice(0, -ext.length) + L.ext;
     f.lang = L.id;
     nameIn.value = f.name;
-    render(); buildRow2(); save();
+    render(); save();
   });
 
   // ---------- Drawer ----------
@@ -1159,7 +971,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
     const h = vv ? vv.height : window.innerHeight;
     root.style.setProperty('--vv-h', h + 'px');
     root.style.setProperty('--vv-top', (vv ? vv.offsetTop : 0) + 'px');
-    document.body.classList.toggle('kb-open', !!vv && window.innerHeight - vv.height > 120);
   }
   if (vv) { vv.addEventListener('resize', fit); vv.addEventListener('scroll', fit); }
   window.addEventListener('resize', fit);
@@ -1169,8 +980,6 @@ body.kb-open .keybar { padding-bottom: 6px; }
   window.addEventListener('pagehide', () => { commit(); save(); });
 
   // ---------- Boot ----------
-  buildRows();
-  applyKeys();
   renderSettings();
   loadFile();
   fit();

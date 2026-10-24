@@ -4,10 +4,7 @@ A code editor for practising on a phone. It is one HTML file with no build step.
 
 ## Features
 
-- Optional code keys above the phone keyboard (hidden by default; tap the keyboard button in the header to show them):
-  - Tab, arrow keys (hold to repeat), Select mode, Undo/Redo, outdent, Home/End, comment, duplicate line, select all
-  - Every symbol you need for code: `{ } ( ) [ ] ; = " ' < > : , . + - * / \ | & ! ? _ # $ % ^ ~ @`
-  - Snippets for each language, such as `console.log()`, `def`, `for` loops, `printf`, and HTML tags
+- Works with your phone's own keyboard: no extra key bar, the whole screen is for code
 - Closes brackets and quotes for you, indents new lines, and removes the indent when you type a closing bracket
 - Syntax highlighting for JavaScript, Python, HTML, CSS, C, C++, and Java
 - **Run**: JavaScript runs in a sandbox and prints to a console. HTML shows a live preview.
